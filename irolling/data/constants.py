@@ -15,7 +15,18 @@
 
 """constants for data"""
 
+# stock index symbol constant
 SSE50_SYMBOL = "000016"
 CSI300_SYMBOL = "000300"
 CSI500_SYMBOL = "000905"
 CSI1000_SYMBOL = "000852"
+
+# exchange name
+CFFEX = "CFFEX"
+
+# stock index variety
+IF = "IF"
+IC = "IC"
+IM = "IM"
+IH = "IH"
+STOCK_INDEX_VARIETIES = (IF, IC, IM, IH)
