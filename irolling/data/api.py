@@ -15,6 +15,8 @@
 
 """api for access stock index data."""
 
+import datetime
+
 import akshare as ak
 
 from irolling.data import constants
@@ -38,6 +40,10 @@ def get_stock_index_daily(symbol):
     # filter desired columns
     filter_columns = ["date", "high", "low", "open", "close"]
     df = df[filter_columns]
+    # set the index to datetime.date format
+    df["date"] = df["date"].apply(
+        lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").date(),
+    )
     # set index
     df.set_index("date", inplace=True)
 
@@ -82,6 +88,12 @@ def get_cffex_futures_daily(start_date, end_date):
     ]
 
     df = df[filter_columns]
+
+    # set the date to datetime.date format
+    df["date"] = df["date"].apply(
+        lambda x: datetime.datetime.strptime(x, "%Y%m%d").date(),
+    )
+
     df.set_index("date", inplace=True)
 
     return df
