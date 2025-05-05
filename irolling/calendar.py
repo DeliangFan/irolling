@@ -107,3 +107,39 @@ def next_trading_day(date):
         retry = retry - 1
 
     raise exception.TradingDayNotFoundError
+
+
+def delta_days(start_date, end_date):
+    """number of days between two date"""
+    delta = end_date - start_date
+    return delta.days
+
+
+def is_trading_time(time):
+    """
+    check if it is a trading time
+    :param time: datetime.datetime format
+    """
+    date = time.date()
+    if not is_trading_day(date):
+        return False
+
+    morning_start = datetime.datetime(date.year, date.month, date.day, 9, 30)
+    morning_end = datetime.datetime(date.year, date.month, date.day, 11, 30)
+    if morning_start <= time <= morning_end:
+        return True
+
+    afternoon_start = datetime.datetime(date.year, date.month, date.day, 13, 0)
+    afternoon_end = datetime.datetime(date.year, date.month, date.day, 15, 0)
+    if afternoon_start <= time <= afternoon_end:
+        return True
+
+    return False
+
+
+def get_trading_date():
+    """get_trading_date returns the latest trading date
+    - if today is not a trading date, then return the last trading date
+    - if today is a trading date with in trading time, then return the today
+    - if today is a trading day and it is the trading time, then return the
+    """
