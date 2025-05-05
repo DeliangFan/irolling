@@ -129,3 +129,42 @@ def get_im_futures_daily(df):
     """get im(csi1000) future contracts daily"""
     df = df[df["variety"].isin([constants.IM])]
     return df
+
+
+def get_cffex_contract_info(date):
+    """get cffex current contract info"""
+    df = ak.futures_contract_info_cffex(date)
+
+    name_mapping = {
+        "合约代码": "symbol",
+        "最后交易日": "expire",
+        "品种": "variety",
+    }
+
+    # rename columns
+    df = df.rename(columns=name_mapping)
+    # filter desired columns
+    filter_columns = ["symbol", "expire", "variety"]
+    df = df[filter_columns]
+
+    return df
+
+
+def get_stock_index_contract_info(date):
+    """get stock index contract info"""
+    df = get_cffex_contract_info(date)
+    df = df[df["variety"].isin(constants.STOCK_INDEX_VARIETIES)]
+    return df
+
+
+def get_symbol_expire_map(date):
+    """get symbol expire map"""
+
+    df = get_stock_index_contract_info(date)
+    symbol_expire_map = {}
+    for _, row in df.iterrows():
+        symbol = row["symbol"]
+        expire = row["expire"]
+        symbol_expire_map[symbol] = expire
+
+    return symbol_expire_map
