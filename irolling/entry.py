@@ -34,7 +34,9 @@ def get_contract_basis():
         raise NotImplementedError
 
     # symbol_expire_map
-    symbol_expire_map = api.get_symbol_expire_map(trading_date.strftime("%Y%m%d"))
+    symbol_expire_map = api.get_symbol_expire_map(
+        trading_date.strftime("%Y%m%d"),
+    )
 
     basis_list = []
     for variety, index_symbol in constants.VARIETY_SYMBOL_MAP.items():
@@ -45,6 +47,7 @@ def get_contract_basis():
         # get future price
         future = api.get_stock_index_futures_daily(trading_date, trading_date)
         future = future[future["variety"].isin([variety])]
+        future = future.sort_values(by=["symbol"], ascending=True)
 
         # calculate the basis for symbols
         for _, row in future.iterrows():
@@ -59,3 +62,15 @@ def get_contract_basis():
             basis_list.append(b)
 
     return basis_list
+
+
+def do_list_basis(_):
+    """list basis for current contracts"""
+    basis_list = get_contract_basis()
+    for b in basis_list:
+        print(b.symbol, b.basis_ratio(), b.basis_ratio_by_year())
+
+
+def do_show_basis(args):
+    """show basis details for specified contract"""
+    raise NotImplementedError
