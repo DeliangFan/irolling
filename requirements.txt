@@ -2,3 +2,4 @@
 
 akshare==1.15.64
 chinese_calendar==1.10.0
+prettytable==3.16.0
