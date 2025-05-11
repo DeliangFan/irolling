@@ -17,6 +17,8 @@
 
 import datetime
 
+import prettytable
+
 from irolling.analyzer import basis
 from irolling import calendar
 from irolling.data import api
@@ -38,19 +40,24 @@ def get_contract_basis():
         trading_date.strftime("%Y%m%d"),
     )
 
+    # get future price
+    futures = api.get_stock_index_futures_daily(trading_date, trading_date)
+
     basis_list = []
     for variety, index_symbol in constants.VARIETY_SYMBOL_MAP.items():
         # get spot price
         spot = api.get_stock_index_daily(symbol=index_symbol)
         spot_price = spot.loc[trading_date]["close"]
 
-        # get future price
-        future = api.get_stock_index_futures_daily(trading_date, trading_date)
-        future = future[future["variety"].isin([variety])]
-        future = future.sort_values(by=["symbol"], ascending=True)
+        # filter the contracts by variety
+        contracts = futures[futures["variety"].isin([variety])]
+        contracts = contracts.sort_values(
+            by=["symbol"],
+            ascending=True,
+        )
 
         # calculate the basis for symbols
-        for _, row in future.iterrows():
+        for _, row in contracts.iterrows():
             # prepare the price and days
             future_price = row["close"]
             symbol = row["symbol"]
@@ -58,17 +65,40 @@ def get_contract_basis():
             days = calendar.delta_days(trading_date, expire)
 
             # initiate the basis class for different symbol
-            b = basis.Basis(symbol, future_price, spot_price, days)
-            basis_list.append(b)
+            basis_list.append(
+                basis.Basis(symbol, future_price, spot_price, days),
+            )
 
     return basis_list
 
 
 def do_list_basis(_):
     """list basis for current contracts"""
+
+    table = prettytable.PrettyTable()
+    table.field_names = [
+        "Symbol",
+        "Contract Price",
+        "Spot Price",
+        "Basis",
+        "Basis Ratio(%)",
+        "Basis Ratio By Year(%)",
+        "Residual Maturity(days)",
+    ]
+
     basis_list = get_contract_basis()
     for b in basis_list:
-        print(b.symbol, b.basis_ratio(), b.basis_ratio_by_year())
+        table.add_row([
+            b.symbol,
+            b.future_price,
+            b.spot_price,
+            round(b.basis(), 2),
+            round(b.basis_ratio() * 100, 2),
+            round(b.basis_ratio_by_year() * 100, 2),
+            b.days,
+        ])
+
+    print(table)
 
 
 def do_show_basis(args):
