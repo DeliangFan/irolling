@@ -50,28 +50,8 @@ def get_stock_index_daily(symbol):
     return df
 
 
-def get_sse50_daily():
-    """get sse50 index"""
-    return get_stock_index_daily(constants.SSE50_SYMBOL)
-
-
-def get_csi300_daily():
-    """get csi300 index"""
-    return get_stock_index_daily(constants.CSI300_SYMBOL)
-
-
-def get_csi500_daily():
-    """get csi500 index"""
-    return get_stock_index_daily(constants.CSI500_SYMBOL)
-
-
-def get_csi1000_daily():
-    """get csi1000 index"""
-    return get_stock_index_daily(constants.CSI1000_SYMBOL)
-
-
-def get_cffex_futures_daily(start_date, end_date):
-    """get cffex futures contract daily"""
+def get_stock_index_futures_daily(start_date, end_date):
+    """get stock index futures contract daily"""
     df = ak.get_futures_daily(
         start_date=start_date,
         end_date=end_date,
@@ -93,41 +73,11 @@ def get_cffex_futures_daily(start_date, end_date):
     df["date"] = df["date"].apply(
         lambda x: datetime.datetime.strptime(x, "%Y%m%d").date(),
     )
-
     df.set_index("date", inplace=True)
 
-    return df
-
-
-def get_stock_index_futures_daily(start_date, end_date):
-    """get stock index futures contract daily"""
-    df = get_cffex_futures_daily(start_date, end_date)
     # filter the stock index
     df = df[df["variety"].isin(constants.STOCK_INDEX_VARIETIES)]
-    return df
 
-
-def get_ih_futures_daily(df):
-    """get if(sse50) future contracts daily"""
-    df = df[df["variety"].isin([constants.IH])]
-    return df
-
-
-def get_if_futures_daily(df):
-    """get if(csi300) future contracts daily"""
-    df = df[df["variety"].isin([constants.IF])]
-    return df
-
-
-def get_ic_futures_daily(df):
-    """get ic(csi500) future contracts daily"""
-    df = df[df["variety"].isin([constants.IC])]
-    return df
-
-
-def get_im_futures_daily(df):
-    """get im(csi1000) future contracts daily"""
-    df = df[df["variety"].isin([constants.IM])]
     return df
 
 
@@ -148,8 +98,9 @@ def get_stock_index_realtime(symbol):
     return df.iloc[0]["最新价"]
 
 
-def get_cffex_contract_info(date):
-    """get cffex current contract info"""
+def get_symbol_expire_map(date):
+    """get symbol expire map"""
+
     df = ak.futures_contract_info_cffex(date)
 
     name_mapping = {
@@ -163,21 +114,10 @@ def get_cffex_contract_info(date):
     # filter desired columns
     filter_columns = ["symbol", "expire", "variety"]
     df = df[filter_columns]
-
-    return df
-
-
-def get_stock_index_contract_info(date):
-    """get stock index contract info"""
-    df = get_cffex_contract_info(date)
+    # filter the dataframe by variety
     df = df[df["variety"].isin(constants.STOCK_INDEX_VARIETIES)]
-    return df
 
-
-def get_symbol_expire_map(date):
-    """get symbol expire map"""
-
-    df = get_stock_index_contract_info(date)
+    # build the symbol expire date map
     symbol_expire_map = {}
     for _, row in df.iterrows():
         symbol = row["symbol"]
