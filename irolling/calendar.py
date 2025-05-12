@@ -137,6 +137,24 @@ def is_trading_time(time):
     return False
 
 
+def is_after_open_and_before_close(time):
+    """
+    check if it is after market morning open time and before market close
+    afternoon
+    :param time:
+    """
+    date = time.date()
+    if not is_trading_day(date):
+        return False
+
+    morning_start = datetime.datetime(date.year, date.month, date.day, 9, 30)
+    afternoon_end = datetime.datetime(date.year, date.month, date.day, 15, 0)
+    if morning_start <= time <= afternoon_end:
+        return True
+
+    return False
+
+
 def is_before_open(time):
     """
     check if it is before market open
@@ -161,11 +179,3 @@ def is_after_close(time):
         return True
 
     return False
-
-
-def get_trading_date():
-    """get_trading_date returns the latest trading date
-    - if today is not a trading date, then return the last trading date
-    - if today is a trading date with in trading time, then return the today
-    - if today is a trading day and it is the trading time, then return the
-    """

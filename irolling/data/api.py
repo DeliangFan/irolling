@@ -22,7 +22,7 @@ import akshare as ak
 from irolling.data import constants
 
 
-def get_stock_index_daily(symbol):
+def get_stock_index_spot_daily(symbol):
     """get_stock_index return index with dataframe format"""
     df = ak.index_zh_a_hist(symbol=symbol,
                             period="daily",
@@ -81,9 +81,9 @@ def get_stock_index_futures_daily(start_date, end_date):
     return df
 
 
-def get_stock_index_realtime(symbol):
+def get_stock_index_spot_realtime(symbol):
     """get realtime stock index price"""
-    df = ak.stock_zh_index_spot_em(symbol="上证系列指数")
+    df = ak.stock_zh_index_spot_em(symbol="沪深重要指数")
     if symbol == constants.SSE50_SYMBOL:
         df = df[df["名称"].isin(["上证50"])]
     elif symbol == constants.CSI300_SYMBOL:
@@ -96,6 +96,41 @@ def get_stock_index_realtime(symbol):
         raise NotImplementedError
 
     return df.iloc[0]["最新价"]
+
+
+def get_stock_index_futures_realtime(symbol):
+    """get realtime stock index future price"""
+
+    if symbol == constants.SSE50_SYMBOL:
+        cn_symbol = "上证50指数期货"
+    elif symbol == constants.CSI300_SYMBOL:
+        cn_symbol = "沪深300指数期货"
+    elif symbol == constants.CSI500_SYMBOL:
+        cn_symbol = "中证500指数期货"
+    elif symbol == constants.CSI1000_SYMBOL:
+        cn_symbol = "中证1000股指期货"
+    else:
+        raise NotImplementedError
+
+    df = ak.futures_zh_realtime(symbol=cn_symbol)
+
+    # rename columns
+    name_mapping = {
+        "trade": "price",
+    }
+    df = df.rename(columns=name_mapping)
+
+    # filter column
+    filter_columns = [
+        "symbol",
+        "price"
+    ]
+    df = df[filter_columns]
+
+    # filter the continuous main contract
+    df = df[~df["symbol"].isin(["IH0", "IF0", "IC0", "IM0"])]
+
+    return df
 
 
 def get_symbol_expire_map(date):
