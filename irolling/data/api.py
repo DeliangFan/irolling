@@ -131,6 +131,23 @@ def get_im_futures_daily(df):
     return df
 
 
+def get_stock_index_realtime(symbol):
+    """get realtime stock index price"""
+    df = ak.stock_zh_index_spot_em(symbol="上证系列指数")
+    if symbol == constants.SSE50_SYMBOL:
+        df = df[df["名称"].isin(["上证50"])]
+    elif symbol == constants.CSI300_SYMBOL:
+        df = df[df["名称"].isin(["沪深300"])]
+    elif symbol == constants.CSI500_SYMBOL:
+        df = df[df["名称"].isin(["中证500"])]
+    elif symbol == constants.CSI1000_SYMBOL:
+        df = df[df["名称"].isin(["中证1000"])]
+    else:
+        raise NotImplementedError
+
+    return df.iloc[0]["最新价"]
+
+
 def get_cffex_contract_info(date):
     """get cffex current contract info"""
     df = ak.futures_contract_info_cffex(date)
