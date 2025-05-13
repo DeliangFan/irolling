@@ -44,9 +44,9 @@ parser_show = subparsers.add_parser(
     help="show the contract",
 )
 parser_show.add_argument(
-    "contract",
+    "symbol",
     type=str,
-    help="the future contract name to show, for example, IC2503",
+    help="the future contract symbol to show, for example, IC2503",
 )
 parser_show.set_defaults(func=entry.do_show_basis)
 

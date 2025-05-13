@@ -17,6 +17,7 @@
 
 import datetime
 
+from matplotlib import pyplot
 import prettytable
 
 from irolling.analyzer import basis
@@ -36,9 +37,9 @@ def get_contract_basis_by_date(date):
     futures = api.get_stock_index_futures_daily(date, date)
 
     basis_list = []
-    for variety, index_symbol in constants.VARIETY_SYMBOL_MAP.items():
+    for variety, spot_symbol in constants.VARIETY_SYMBOL_MAP.items():
         # get spot price
-        spot = api.get_stock_index_spot_daily(symbol=index_symbol)
+        spot = api.get_stock_index_spot_daily(symbol=spot_symbol)
         spot_price = spot.loc[date]["close"]
 
         # filter the contracts by variety
@@ -156,6 +157,45 @@ def do_list_basis(_):
     print(table)
 
 
+def get_variety_by_contract(symbol):
+    """get variety by contract"""
+    if symbol.startswith(constants.IH):
+        return constants.IH
+
+    if symbol.startswith(constants.IF):
+        return constants.IF
+
+    if symbol.startswith(constants.IC):
+        return constants.IC
+
+    if symbol.startswith(constants.IM):
+        return constants.IM
+
+    raise NotImplementedError
+
+
 def do_show_basis(args):
     """show basis details for specified contract"""
-    raise NotImplementedError
+    symbol = args.symbol
+    variety = get_variety_by_contract(symbol)
+
+    # get the spot data
+    spot_symbol = constants.VARIETY_SYMBOL_MAP[variety]
+    spot = api.get_stock_index_spot_daily(symbol=spot_symbol)
+
+    # get the future data
+    future = api.get_future_daily_by_symbol(symbol)
+
+    # format spot dataframe with close price
+    spot_close = spot[["close"]]
+    spot_close.rename(columns={"close": "spot_close"}, inplace=True)
+
+    # format future dataframe with close price
+    future_close = future[["close"]]
+    future_close.rename(columns={"close": "future_close"}, inplace=True)
+
+    # join spot and future dataframe
+    df = future_close.join(spot_close, how="inner")
+
+    df.plot()
+    pyplot.show()

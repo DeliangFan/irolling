@@ -44,8 +44,10 @@ def get_stock_index_spot_daily(symbol):
     df["date"] = df["date"].apply(
         lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").date(),
     )
+
     # set index
     df.set_index("date", inplace=True)
+    df.sort_index(inplace=True)
 
     return df
 
@@ -74,9 +76,33 @@ def get_stock_index_futures_daily(start_date, end_date):
         lambda x: datetime.datetime.strptime(x, "%Y%m%d").date(),
     )
     df.set_index("date", inplace=True)
+    df.sort_index(inplace=True)
 
     # filter the stock index
     df = df[df["variety"].isin(constants.STOCK_INDEX_VARIETIES)]
+
+    return df
+
+
+def get_future_daily_by_symbol(symbol):
+    """get futures contract daily by symbol"""
+    df = ak.futures_zh_daily_sina(symbol=symbol)
+
+    filter_columns = [
+        "date",
+        "open",
+        "high",
+        "low",
+        "close",
+    ]
+    df = df[filter_columns]
+
+    # set the date to datetime.date format
+    df["date"] = df["date"].apply(
+        lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").date(),
+    )
+    df.set_index("date", inplace=True)
+    df.sort_index(inplace=True)
 
     return df
 
