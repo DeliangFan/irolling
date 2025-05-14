@@ -174,6 +174,47 @@ def get_variety_by_contract(symbol):
     raise NotImplementedError
 
 
+def get_expire_date(symbol, df):
+    """get expire date"""
+    today = datetime.date.today()
+    symbol_expire_map = api.get_symbol_expire_map(
+        today.strftime("%Y%m%d"),
+    )
+
+    if symbol in symbol_expire_map:
+        return symbol_expire_map[symbol]
+
+    return df.index[-1]
+
+
+def do_plot(df):
+    """plot the figure for symbol dataframe"""
+
+    _, axs = pyplot.subplots(3, 1)
+
+    # figure0, plot the price
+    axs[0].plot(df.index, df.spot_close, color="red", label="spot")
+    axs[0].plot(df.index, df.future_close, color="blue", label="future")
+    axs[0].set_title("Spot & Future Price")
+    axs[0].legend(loc='upper right')
+
+    # figure1, plot the basis
+    axs[1].plot(df.index, df.basis, color="red", label="basis")
+    axs[1].set_title("Basis")
+    axs[1].legend(loc='upper right')
+
+    # figure2, plot the basis ratio and basis ratio by year
+    axs[2].plot(df.index, df.basis_ratio, color="red", label="basis ratio")
+    axs[2].plot(df.index,
+                df.basis_ratio_by_year,
+                color="blue",
+                label="basis ratio by year")
+    axs[2].set_title("Basis Ratio")
+    axs[2].legend(loc='upper right')
+
+    pyplot.show()
+
+
 def do_show_basis(args):
     """show basis details for specified contract"""
     symbol = args.symbol
@@ -188,14 +229,26 @@ def do_show_basis(args):
 
     # format spot dataframe with close price
     spot_close = spot[["close"]]
-    spot_close.rename(columns={"close": "spot_close"}, inplace=True)
+    spot_close = spot_close.rename(columns={"close": "spot_close"})
 
     # format future dataframe with close price
     future_close = future[["close"]]
-    future_close.rename(columns={"close": "future_close"}, inplace=True)
+    future_close = future_close.rename(columns={"close": "future_close"})
+
+    # get he expire date to compute basis ratio
+    expire_date = get_expire_date(symbol, future)
 
     # join spot and future dataframe
     df = future_close.join(spot_close, how="inner")
 
-    df.plot()
-    pyplot.show()
+    # add basis column
+    for date, row in df.iterrows():
+        days = calendar.delta_days(date, expire_date)
+        b = basis.Basis(symbol, row["future_close"], row["spot_close"], days)
+        df.loc[date, "basis"] = b.basis()
+        df.loc[date, "basis_ratio"] = round(b.basis_ratio() * 100, 2)
+        df.loc[date, "basis_ratio_by_year"] = \
+            round(b.basis_ratio_by_year() * 100, 2)
+
+    # plot the figure
+    do_plot(df)

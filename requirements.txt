@@ -2,4 +2,7 @@
 
 akshare==1.15.64
 chinese_calendar==1.10.0
+matplotlib==3.9.4
 prettytable==3.16.0
+# Editable install with no version control (setuptools==75.1.0)
+-e /opt/miniconda3/envs/py39/lib/python3.9/site-packages/setuptools-75.1.0-py3.9.egg-info
