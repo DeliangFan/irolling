@@ -40,4 +40,7 @@ class Basis:
 
     def basis_ratio_by_year(self):
         """basis ratio between contract and index by year"""
+        if self.days == 0:
+            return 0
+
         return self.basis_ratio() * 365 / self.days
