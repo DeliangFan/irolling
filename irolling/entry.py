@@ -148,7 +148,7 @@ def do_list_basis(_):
             b.symbol,
             b.future_price,
             b.spot_price,
-            round(b.basis(), 2),
+            b.basis(),
             round(b.basis_ratio() * 100, 2),
             round(b.basis_ratio_by_year() * 100, 2),
             b.days,
