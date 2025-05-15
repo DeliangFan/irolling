@@ -40,6 +40,14 @@ Compute basis with daily 20250512
 +--------+----------------+------------+---------+----------------+------------------------+-------------------------+
 ```
 
+Show the detail contract by symbol.
+
+```
+$ irolling show IC2012
+```
+
+![irolling show IC2012](https://wsfdl.oss-cn-qingdao.aliyuncs.com/irolling_ic2012.png)
+
 For more usage, you may refer to
 
 ```
