@@ -32,15 +32,15 @@ class Basis:
 
     def basis(self):
         """basis between contract and index"""
-        return self.future_price - self.spot_price
+        return round(self.future_price - self.spot_price, 2)
 
     def basis_ratio(self):
         """basis ratio between contract and index"""
-        return self.basis() / self.spot_price
+        return round(self.basis() / self.spot_price, 4)
 
     def basis_ratio_by_year(self):
         """basis ratio between contract and index by year"""
         if self.days == 0:
             return 0
 
-        return self.basis_ratio() * 365 / self.days
+        return round(self.basis_ratio() * 365 / self.days, 4)

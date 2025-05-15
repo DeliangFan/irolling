@@ -112,7 +112,7 @@ def next_trading_day(date):
 def delta_days(start_date, end_date):
     """number of days between two date"""
     delta = end_date - start_date
-    return delta.days
+    return delta.days + 1
 
 
 def is_trading_time(time):
